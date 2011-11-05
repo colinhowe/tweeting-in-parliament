@@ -8,7 +8,7 @@ class Member(Document):
     party = StringField(required=True)
     constituency_name = StringField()
 
-    twitter_id = StringField(required=False)
+    twitter_id = StringField(unique=True)
     constituency_id = IntField()
     theyworkforyou_id = IntField()
     publicwhip_id = IntField()
@@ -27,7 +27,7 @@ def _sanitize_screen_name(screen_name):
 def _sanitize_publicwhip_id(input):
     return input.split('/')[-1]
 
-#scripts for churning through various csvs
+#scripts for  getting member data into mongo
 def _initial_import():
     import csv
     reader = csv.DictReader(open('mps.csv', 'rb'))

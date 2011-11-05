@@ -1,17 +1,8 @@
 # -*- coding: utf-8 -*-
-import pymongo
+from tweets import tweets_collection
 from tweepy import OAuthHandler, API, TweepError
 from members.documents import Member, _sanitize_screen_name
 from twitter_credentials import *
-
-DATABASE = 'parliament'
-TWEET_COLLECTION = 'tweets'
-
-connection = pymongo.Connection()
-db = connection[DATABASE]
-tweets_collection = db[TWEET_COLLECTION]
-tweets_collection.ensure_index([("screen_name", pymongo.ASCENDING), ("created_at", pymongo.ASCENDING)])
-tweets_collection.ensure_index([("id", pymongo.ASCENDING)], unique=True)
 
 auth_handler = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth_handler.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
@@ -33,11 +24,15 @@ def _status_to_dict(status):
 
 def fetch_member_tweets(member, page):
     try:
+        if not member.twitter_id:
+            user = api.get_user(member.screen_name)
+            member.twitter_id = str(user.id)
+            member.save()
         member_tweets = api.user_timeline(screen_name=member.screen_name,
-              page=page, count=200, include_entities=True)
+            uid=member.twitter_id, page=page, count=100, include_entities=True)
     except TweepError, e:
-        if e.message == 'Not found':
-            print 'member %s does not exist, deleting', m.screen_name
+        if e.reason == 'Not found':
+            print 'member %s does not exist, deleting', member.screen_name
             member.delete()
             return
         else:
@@ -49,7 +44,7 @@ def fetch_member_tweets(member, page):
         tweets_collection.insert(t)
 
 def fetch_all():
-    for page in (1, 2, 3):
+    for page in (2, 3, 4):
         for m in Member.objects.all():
             print 'fetching page %s of tweets for %s' % (page, m.name)
             fetch_member_tweets(m, page)
