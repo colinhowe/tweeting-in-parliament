@@ -4,7 +4,7 @@ connect('parliament')
 
 class Member(Document):
     name = StringField(required=True)
-    screen_name = StringField(required=True)
+    screen_name = StringField(required=True, unique=True)
     party = StringField(required=True)
     constituency_name = StringField()
 
@@ -18,6 +18,8 @@ class Member(Document):
     }
 
 def _sanitize_screen_name(screen_name):
+    if not screen_name:
+        return None
     if screen_name.startswith('@'):
         screen_name = screen_name[1:]
     return screen_name.lower()
@@ -45,14 +47,17 @@ def _update_ids():
     import csv
     reader = csv.DictReader(open('members_with_ids.csv', 'rb'))
     for mp in reader:
-        if not mp['twitter']:
+        screen_name = _sanitize_screen_name(mp['twitter'])
+        if not screen_name:
             continue
         try:
-            member = Member.objects.get(screen_name=_sanitize_screen_name(mp['twitter']))
-            member.publicwhip_id=_sanitize_publicwhip_id(mp['url'])
+            member = Member.objects.get(screen_name=screen_name)
+            publicwhip_id = _sanitize_publicwhip_id(mp['url'])
+            print 'adding publicwhip id %s to %s' % (publicwhip_id, screen_name)
+            member.publicwhip_id = publicwhip_id
             member.save()
         except Member.DoesNotExist:
-            print 'creating %s' % mp['twitter']
+            print 'creating %s' % screen_name
             party = mp['party']
             if party in _PARTY_MAP:
                 party = _PARTY_MAP[party]
@@ -60,4 +65,4 @@ def _update_ids():
                 name='%s %s' % (mp['firstname'], mp['lastname']),
                 publicwhip_id=_sanitize_publicwhip_id(mp['url']),
                 party=party,
-                screen_name=mp['twitter'])
+                screen_name=screen_name)
