@@ -3,3 +3,4 @@ sqlalchemy
 requests
 BeautifulSoup
 tablib
+pymongo
