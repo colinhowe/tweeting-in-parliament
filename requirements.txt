@@ -2,4 +2,4 @@ flask
 sqlalchemy
 requests
 BeautifulSoup
-
+tablib
