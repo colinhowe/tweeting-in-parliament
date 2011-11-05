@@ -3,3 +3,7 @@ sqlalchemy
 requests
 beautifulsoup
 python-memcached
+tablib
+pymongo
+mongoengine
+tweepy
