@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="/static/hansard.css">
+        <script type="text/javascript" src="/static/jquery-1.7.min.js"></script>
+        <script type="text/javascript" src="/static/hansard.js"></script>
+    </head>
+    <body>
+        <h3>Before the debate</h3>
+        <div id="predebate_tweets"></div>
+        <br clear="both" />
+        <h3>The debate</h3>
+        <div id="hansard_body">
+            {{ hansard_html|safe }}
+        </div>
+        <h3>After the debate</h3>
+        <div id="postdebate_tweets"></div>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                var times = {{ times|safe }};
+                var tweets = {{ tweets|safe }};
+                display_tweets(times, tweets);
+            });
+        </script>
+    </body>
+</html>
