@@ -4,6 +4,7 @@ from datetime import timedelta
 from flask import Flask, render_template
 
 from hansard import hansard_tidy
+from tweets.query import tweets_between
 
 app = Flask(__name__)
 
@@ -16,16 +17,7 @@ def hansard(hansard):
     start = date + timedelta(minutes=times[0])
     end = date + timedelta(minutes=times[-1])
 
-    tweets = [
-        { 'time': '9:35', 
-          'screenname': 'colinhowe',
-          'profile_pic': 'http://a0.twimg.com/profile_images/142208196/profile_normal.png',
-          'body': 'I am really excited about this bill.' },
-        { 'time': '9:36', 
-          'screenname': 'colinhowe',
-          'profile_pic': 'http://a0.twimg.com/profile_images/142208196/profile_normal.png',
-          'body': 'I am really excited about this bill.' },
-    ]
+    tweets = tweets_between(start, end)
     return render_template(
             'hansard.html', 
             times=json.dumps(times),

@@ -8,15 +8,17 @@ body {
     width: 600px;
 }
 
-#predebate_tweets .tweet {
+#predebate_tweets .tweet,
+#postdebate_tweets .tweet {
     border: none;
     margin: 0;
     padding: 10px 0;
+    clear: none;
 }
 
 .tweet {
     width: 280px;
-    max-height: 150px;
+    height: 120px;
     border-left: 1px solid #aaa;
     float: left;
     margin: 10px;

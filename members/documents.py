@@ -42,6 +42,7 @@ _PARTY_MAP = {'Lab': 'Labour',
               'Con': 'Conservative',
               'LDem': 'Liberal Democrats',
          }
+    _update_ids()
 
 def _update_ids():
     import csv
