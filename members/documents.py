@@ -37,12 +37,12 @@ def _initial_import():
             screen_name=_sanitize_screen_name(mp['Twitter Screen Name']),
             constituency_name=mp['Constituency Name'],
             party=mp['Party'])
+    _update_ids()
 
 _PARTY_MAP = {'Lab': 'Labour',
               'Con': 'Conservative',
               'LDem': 'Liberal Democrats',
          }
-    _update_ids()
 
 def _update_ids():
     import csv

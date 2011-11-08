@@ -44,7 +44,7 @@ def fetch_member_tweets(member, page):
         tweets_collection.insert(t)
 
 def fetch_all():
-    for page in (2, 3, 4):
+    for page in (1, 2, 3, 4):
         for m in Member.objects.all():
             print 'fetching page %s of tweets for %s' % (page, m.name)
             fetch_member_tweets(m, page)
