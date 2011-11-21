@@ -12,7 +12,8 @@ MEMBER_OUTPUT_ROWS = [
     'theyworkforyou_id',
     'publicwhip_id',
     'dataparliament_id',
-    'active',
+    'inactive',
+    'protected',
 ]
 
 class Member(Document):
@@ -26,7 +27,8 @@ class Member(Document):
     theyworkforyou_id = IntField()
     publicwhip_id = IntField()
     dataparliament_id = IntField()
-    active = BooleanField()
+    inactive = BooleanField()
+    protected = BooleanField()
     meta = {
         'indexes': ['screen_name', ]
     }

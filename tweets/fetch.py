@@ -30,14 +30,17 @@ def save_member_twitter_id(member):
     except TweepError, e:
         if e.reason == 'Not found':
             print 'member %s not found, setting not active.', member.screen_name
-            member.active = False
+            member.inactive = True
             member.save()
         raise
     else:
         member.twitter_id = str(user.id)
         member.save()
 
-def fetch_member_tweets(member, page):
+def fetch_member_tweets(member, page, retries=0):
+    if retries >= 3:
+        return
+
     try:
         if not member.twitter_id:
             save_member_twitter_id(member)
@@ -50,11 +53,21 @@ def fetch_member_tweets(member, page):
             uid=member.twitter_id, page=page, count=100, include_entities=True,
             headers={'User-Agent': 'conversocial.com'})
     except TweepError, e:
-        print e
-        return
+        if e.reason == 'Not authorized':
+            print 'member %s protects their tweets.' % member.screen_name
+            member.protected = True
+            member.save()
+            return
+        elif e.reason == 'Twitter error response: status code = 502':
+            retries += 1
+            fetch_member_tweets(member, page, retries)
+            return
+        else:
+            print e
+            return
 
     if member_tweets:
-        member.active = True
+        member.inactive = False
         member.save()
 
     for tweet in member_tweets:
@@ -62,10 +75,11 @@ def fetch_member_tweets(member, page):
 
 def fetch_all(pages, start_at=None):
     for m in Member.objects.all().order_by('screen_name'):
+        if m.protected or m.inactive:
+            continue
         for page in pages:
             if start_at and m.screen_name < start_at:
                 print 'skipping %s' % m.name
                 continue
             print 'fetching page %s of tweets for %s, id:%s' % (page, m.name, m.id)
             fetch_member_tweets(m, page)
-        time.sleep(8)
