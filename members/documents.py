@@ -8,7 +8,7 @@ class Member(Document):
     party = StringField(required=True)
     constituency_name = StringField()
 
-    twitter_id = StringField(unique=True)
+    twitter_id = StringField()
     constituency_id = IntField()
     theyworkforyou_id = IntField()
     publicwhip_id = IntField()

@@ -3,6 +3,7 @@ from tweets import tweets_collection
 from tweepy import OAuthHandler, API, TweepError
 from members.documents import Member, _sanitize_screen_name
 from twitter_credentials import *
+import time
 
 auth_handler = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
 auth_handler.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
@@ -25,11 +26,13 @@ def _status_to_dict(status):
 def fetch_member_tweets(member, page):
     try:
         if not member.twitter_id:
-            user = api.get_user(member.screen_name)
+            user = api.get_user(member.screen_name, 
+                headers={'User-Agent': 'conversocial.com'})
             member.twitter_id = str(user.id)
             member.save()
         member_tweets = api.user_timeline(screen_name=member.screen_name,
-            uid=member.twitter_id, page=page, count=100, include_entities=True)
+            uid=member.twitter_id, page=page, count=100, include_entities=True, 
+            headers={'User-Agent': 'conversocial.com'})
     except TweepError, e:
         if e.reason == 'Not found':
             print 'member %s does not exist, deleting', member.screen_name
@@ -43,9 +46,12 @@ def fetch_member_tweets(member, page):
     for t in member_tweets:
         tweets_collection.insert(t)
 
-def fetch_all():
-    for page in (1, 2, 3, 4):
-        for m in Member.objects.all():
-            print 'fetching page %s of tweets for %s' % (page, m.name)
+def fetch_all(pages, start_at=None):
+    for m in Member.objects.all().order_by('screen_name'):
+        for page in pages:
+            if start_at and m.screen_name < start_at:
+                print 'skipping %s' % m.name
+                continue
+            print 'fetching page %s of tweets for %s, id:%s' % (page, m.name, m.id)
             fetch_member_tweets(m, page)
-
+        time.sleep(8)
