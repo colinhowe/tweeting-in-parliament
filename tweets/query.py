@@ -1,7 +1,7 @@
 from tweets import tweets_collection
 from datetime import datetime, timedelta
 
-MARGIN = timedelta(hours=1)
+MARGIN = timedelta(hours=0.5)
 
 def _time_for_display(time):
     return datetime.strftime(time, '%H:%M')

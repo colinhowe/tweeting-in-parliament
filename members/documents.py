@@ -1,6 +1,19 @@
-from mongoengine import (Document, StringField, IntField, connect)
+from mongoengine import (Document, StringField, IntField, connect, BooleanField)
+import csv
 
 connect('parliament')
+MEMBER_OUTPUT_ROWS = [
+    'name',
+    'screen_name',
+    'party',
+    'constituency_name',
+    'twitter_id',
+    'constituency_id',
+    'theyworkforyou_id',
+    'publicwhip_id',
+    'dataparliament_id',
+    'active',
+]
 
 class Member(Document):
     name = StringField(required=True)
@@ -13,6 +26,7 @@ class Member(Document):
     theyworkforyou_id = IntField()
     publicwhip_id = IntField()
     dataparliament_id = IntField()
+    active = BooleanField()
     meta = {
         'indexes': ['screen_name', ]
     }
@@ -27,9 +41,14 @@ def _sanitize_screen_name(screen_name):
 def _sanitize_publicwhip_id(input):
     return input.split('/')[-1]
 
-#scripts for  getting member data into mongo
+#scripts for getting member data into and out of mongo
+def _export():
+    writer = csv.DictWriter(open('our_mps.csv', 'wb'), extrasaction='ignore',
+                            fieldnames=MEMBER_OUTPUT_ROWS)
+    for member in Member.objects:
+        writer.writerow(member.to_mongo())
+
 def _initial_import():
-    import csv
     reader = csv.DictReader(open('mps.csv', 'rb'))
     for mp in reader:
         Member.objects.create(
